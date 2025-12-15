@@ -23,7 +23,7 @@ export const POST = async (request: Request) => {
     }
     const hashedPassword = await hashPassword(password);
 
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         email,
         name,
@@ -31,6 +31,14 @@ export const POST = async (request: Request) => {
         discountUnlockedAt: "",
       },
     });
+
+    // setup user cart
+    await prisma.cart.create({
+      data: {
+        userId: newUser.id,
+      },
+    });
+
     return new Response("User created successfully", { status: 201 });
   } catch (error) {
     console.error(error);

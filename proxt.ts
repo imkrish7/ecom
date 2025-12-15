@@ -12,6 +12,10 @@ export default async function proxy(req: NextRequest) {
 
   const cookie = req.cookies.get("session")?.value;
 
+  if (!cookie) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
   const session = await verifyJWT(cookie);
 
   if (isProtected && !session.id) {
