@@ -1,3 +1,4 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,11 +16,42 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import loginSchema from "@/schema/login.schema";
+import { Form } from "./ui/form";
+import { useTransition } from "react";
+import { LoaderIcon } from "lucide-react";
+import { login } from "@/services/authService";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [isPending, startTransition] = useTransition();
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
+    startTransition(async () => {
+      try {
+        const response = await login(data.email, data.password);
+        console.log(response);
+        toast.success("Login successful");
+      } catch (error) {
+        console.error(error);
+        toast.error("Login failed");
+      }
+    });
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -30,39 +62,73 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}>
+              <FieldGroup>
+                <Controller
+                  name="email"
+                  control={form.control}
+                  render={({ field, fieldState }) => {
+                    return (
+                      <Field data-invalid={fieldState.error}>
+                        <FieldLabel htmlFor="email">Email</FieldLabel>
+                        <Input
+                          {...field}
+                          id="email"
+                          type="email"
+                          placeholder="m@example.com"
+                          required
+                        />
+                      </Field>
+                    );
+                  }}
                 />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
-              </Field>
-              <Field>
-                <Button type="submit">Login</Button>
 
-                <FieldDescription className="text-center">
-                  Don&apos;t have an account?{" "}
-                  <Link href="/signup">Sign up</Link>
-                </FieldDescription>
-              </Field>
-            </FieldGroup>
-          </form>
+                <Controller
+                  name="password"
+                  control={form.control}
+                  render={({ field, fieldState }) => {
+                    return (
+                      <Field data-invalid={fieldState.error}>
+                        <div className="flex items-center">
+                          <FieldLabel htmlFor="password">Password</FieldLabel>
+                          <a
+                            href="#"
+                            className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                          >
+                            Forgot your password?
+                          </a>
+                        </div>
+                        <Input
+                          {...field}
+                          id="password"
+                          type="password"
+                          required
+                        />
+                      </Field>
+                    );
+                  }}
+                />
+
+                <Field>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending && (
+                      <LoaderIcon
+                        role="status"
+                        aria-label="Loading"
+                        className={cn("size-4 animate-spin mr-3")}
+                      />
+                    )}
+                    Login
+                  </Button>
+                  <FieldDescription className="text-center">
+                    Don&apos;t have an account?{" "}
+                    <Link href="/signup">Sign up</Link>
+                  </FieldDescription>
+                </Field>
+              </FieldGroup>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

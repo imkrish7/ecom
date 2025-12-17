@@ -5,7 +5,8 @@ import { createJWT } from "@/lib/authSecretUtil";
 import loginSchema from "@/schema/login.schema";
 import { cookies } from "next/headers";
 
-export const POST = async (req: NextRequest) => {
+export async function POST(req: NextRequest) {
+  console.log("POST /api/auth/login");
   const data = await req.json();
   const cookieStore = await cookies();
 
@@ -42,4 +43,4 @@ export const POST = async (req: NextRequest) => {
     console.error(error);
     return new Response("Internal Server Error", { status: 500 });
   }
-};
+}

@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { verifyJWT } from "./lib/authSecretUtil";
 
 const protectedRoutes = ["/dashboard"];
-const publicRoutes = ["/login", "/signup", "/"];
+const publicRoutes = ["/signin", "/signup", "/"];
 
 export default async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -12,14 +12,16 @@ export default async function proxy(req: NextRequest) {
 
   const cookie = req.cookies.get("session")?.value;
 
-  if (!cookie) {
-    return NextResponse.redirect(new URL("/login", req.url));
+  if (!cookie && isPublic) {
+    return NextResponse.next();
   }
-
+  if (!cookie) {
+    return NextResponse.redirect(new URL("/signin", req.url));
+  }
   const session = await verifyJWT(cookie);
 
   if (isProtected && !session.id) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/signin", req.url));
   }
 
   if (
