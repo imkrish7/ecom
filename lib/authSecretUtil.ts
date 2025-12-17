@@ -13,8 +13,7 @@ export const createJWT = async (payload: AuthPayload) => {
   return token;
 };
 
-export const verifyJWT = async (token: string | undefined) => {
-  console.log(token);
+export const verifyJWT = async (token: string) => {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error("JWT_SECRET is not defined");
   const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));

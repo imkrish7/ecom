@@ -8,6 +8,8 @@ export const verifySession = async () => {
   if (!session) return redirect("/login");
   const authentication = await verifyJWT(session);
 
+  console.log(authentication, "JWT");
+
   if (!authentication.id) {
     redirect("/login");
   }

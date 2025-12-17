@@ -2,6 +2,7 @@ export const http = async <T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> => {
+  console.log("fetching", url);
   const response = await fetch(url, {
     headers: {
       ...options?.headers,

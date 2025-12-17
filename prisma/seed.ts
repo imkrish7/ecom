@@ -34,9 +34,27 @@ async function main() {
   // Products
   const products = await prisma.product.createMany({
     data: [
-      { name: "Laptop", price: 1000 },
-      { name: "Mouse", price: 50 },
-      { name: "Keyboard", price: 120 },
+      {
+        name: "Laptop",
+        description:
+          "A high-performance laptop suitable for software development, gaming, and everyday productivity. Comes with fast SSD storage and a powerful processor.",
+        price: 1000,
+        imageUrl: "https://picsum.photos/seed/laptop/600/400",
+      },
+      {
+        name: "Mouse",
+        description:
+          "Wireless ergonomic mouse designed for long working hours. Provides precision tracking and a comfortable grip.",
+        price: 50,
+        imageUrl: "https://picsum.photos/seed/mouse/600/400",
+      },
+      {
+        name: "Keyboard",
+        description:
+          "Mechanical keyboard with tactile switches and customizable backlighting. Ideal for programmers and gamers.",
+        price: 120,
+        imageUrl: "https://picsum.photos/seed/keyboard/600/400",
+      },
     ],
   });
 

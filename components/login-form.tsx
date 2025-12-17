@@ -25,12 +25,14 @@ import { useTransition } from "react";
 import { LoaderIcon } from "lucide-react";
 import { login } from "@/services/authService";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -42,8 +44,8 @@ export function LoginForm({
   const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
     startTransition(async () => {
       try {
-        const response = await login(data.email, data.password);
-        console.log(response);
+        await login(data.email, data.password);
+        router.push("/dashboard");
         toast.success("Login successful");
       } catch (error) {
         console.error(error);

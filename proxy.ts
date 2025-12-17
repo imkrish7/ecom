@@ -1,5 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { verifyJWT } from "./lib/authSecretUtil";
+import { JWTExpired } from "jose/errors";
+import { deleteSession } from "./lib/deleteSession";
 
 const protectedRoutes = ["/dashboard"];
 const publicRoutes = ["/signin", "/signup", "/"];
@@ -18,21 +20,28 @@ export default async function proxy(req: NextRequest) {
   if (!cookie) {
     return NextResponse.redirect(new URL("/signin", req.url));
   }
-  const session = await verifyJWT(cookie);
+  try {
+    const session = await verifyJWT(cookie);
 
-  if (isProtected && !session.id) {
-    return NextResponse.redirect(new URL("/signin", req.url));
+    if (isProtected && !session.id) {
+      return NextResponse.redirect(new URL("/signin", req.url));
+    }
+
+    if (
+      isPublic &&
+      session.id &&
+      !req.nextUrl.pathname.startsWith("/dashboard")
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    if (error instanceof JWTExpired) {
+      await deleteSession();
+      return NextResponse.redirect(new URL("/signin", req.url));
+    }
   }
-
-  if (
-    isPublic &&
-    session.id &&
-    !req.nextUrl.pathname.startsWith("/dashboard")
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {
