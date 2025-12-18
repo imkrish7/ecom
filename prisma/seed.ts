@@ -26,6 +26,7 @@ async function main() {
     data: {
       email: "test@example.com",
       name: "Test User",
+      role: "user",
       password: hashedPassword,
       completedOrderCount: 2,
     },

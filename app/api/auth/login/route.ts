@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       return new Response("Invalid email or password", { status: 401 });
     }
 
-    const token = await createJWT({ id: user.id, email });
+    const token = await createJWT({ id: user.id, email, role: user.role });
 
     cookieStore.set("session", token, {
       httpOnly: true,
