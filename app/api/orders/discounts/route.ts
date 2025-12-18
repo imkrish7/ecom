@@ -9,17 +9,28 @@ export const GET = async () => {
         id: session.user.id,
       },
     });
-
-    const fetchOrders = await prisma.order.findMany({
-      take: 10,
-      cursor: {
-        id: user?.discountUnlockedAt || undefined,
-      },
-      where: {
-        userId: user?.id,
-        completed: true,
-      },
-    });
+    let query = {};
+    if (user?.discountUnlockedAt) {
+      query = {
+        take: 10,
+        cursor: {
+          id: user?.discountUnlockedAt ?? undefined,
+        },
+        where: {
+          userId: user?.id,
+          completed: true,
+        },
+      };
+    } else {
+      query = {
+        take: 10,
+        where: {
+          userId: user?.id,
+          completed: true,
+        },
+      };
+    }
+    const fetchOrders = await prisma.order.findMany(query);
     const coupons = await prisma.coupon.findMany({
       where: {
         orderRequirements: {

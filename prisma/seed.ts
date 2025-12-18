@@ -87,7 +87,7 @@ async function main() {
   await prisma.coupon.create({
     data: {
       code: "EVERY3RD10",
-      orderRequirements: 3,
+      orderRequirements: 1,
       discount: 10,
     },
   });

@@ -32,7 +32,10 @@ export const POST = async (request: Request) => {
     );
 
     if (itemExist) {
-      return new Response("Item already exist in cart", { status: 400 });
+      return new Response(
+        JSON.stringify({ message: "Item already exist in cart" }),
+        { status: 400 },
+      );
     }
 
     // update cart
@@ -73,25 +76,31 @@ export const GET = async () => {
     });
 
     if (!cart) {
-      return new Response("Cart not found", { status: 404 });
+      return new Response(JSON.stringify({ message: "Cart not found" }), {
+        status: 404,
+      });
     }
 
     if (!cart._count.cartItems) {
-      return new Response("Cart is empty", { status: 400 });
+      return new Response(JSON.stringify({ message: "Cart is empty" }), {
+        status: 400,
+      });
     }
 
     const fetchProduct = await prisma.$queryRaw`
-      SELECT p.id, p.name, p.price,
-      FROM products p
-      JOIN cartItem ci ON p.id = ci.product_id
-      WHERE ci.cart_id = ${cart.id};
+      SELECT p.id, p.name, p.price, p.imageUrl, p.description, p.createdAt, p.updatedAt, ci.quantity, ci.id as cartItemId, ci.selected
+      FROM Product p
+      JOIN CartItem ci ON p.id = ci.productId
+      WHERE ci.cartId = ${cart.id};
     `;
 
-    console.log(fetchProduct);
-
-    return new Response(JSON.stringify(cart), { status: 200 });
+    return new Response(JSON.stringify({ products: fetchProduct }), {
+      status: 200,
+    });
   } catch (error) {
     console.error(error);
-    return new Response("Internal Server Error", { status: 500 });
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), {
+      status: 500,
+    });
   }
 };

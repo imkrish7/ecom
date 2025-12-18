@@ -4,6 +4,9 @@ export interface Product {
   price: number;
   imageUrl: string;
   description: string;
+  cartItemId?: string;
+  quantity?: number;
+  selected?: boolean;
   updatedAt: string;
   createdAt: string;
 }

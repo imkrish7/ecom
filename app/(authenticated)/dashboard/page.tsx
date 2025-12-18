@@ -28,7 +28,9 @@ export default function Page() {
       ) : products.length > 0 ? (
         <>
           {products.map((product: Product) => {
-            return <ProductCard key={product.id} product={product} />;
+            return (
+              <ProductCard key={product.id} product={product} isCart={false} />
+            );
           })}
         </>
       ) : (

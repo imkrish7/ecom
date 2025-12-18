@@ -2,7 +2,6 @@ export const http = async <T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> => {
-  console.log("fetching", url);
   const response = await fetch(url, {
     headers: {
       ...options?.headers,
@@ -12,7 +11,8 @@ export const http = async <T>(
     ...options,
   });
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throw new Error(`HTTP error!: ${(await response.json()).message}`);
   }
-  return response.json();
+  const data = await response.json();
+  return data;
 };
