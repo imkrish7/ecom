@@ -24,6 +24,9 @@ export const orderSchema = z.object({
   ),
   totalAmount: z.number().min(0),
   cardNumber: z.string().min(16).max(16),
+  cardExpiration: z.string().min(5).max(7),
+  cvv: z.string().min(3).max(4),
+  couponCode: z.string().min(5).optional(),
 });
 
 export const cardDetailsSchema = z.object({

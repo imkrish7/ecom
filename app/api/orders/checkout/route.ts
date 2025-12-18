@@ -8,16 +8,25 @@ import prisma from "@/lib/prisma";
 export const POST = async (request: NextRequest) => {
   const session = await verifySession();
   try {
-    const order = await orderSchema.parseAsync(request.json());
+    const data = await request.json();
+    const order = orderSchema.safeParse(data);
+    console.log(order.data);
+
+    if (!order.success) {
+      return new Response(JSON.stringify({ error: "Invalid order data" }), {
+        status: 400,
+      });
+    }
+
     // create order with status payment pending;
     const createdOrder = await prisma.order.create({
       data: {
         userId: session?.user.id,
         status: "pending",
-        totalAmount: order.totalAmount,
+        totalAmount: order.data?.totalAmount,
         orderItems: {
           createMany: {
-            data: order.items.map((item) => ({
+            data: order.data?.items.map((item) => ({
               productId: item.productId,
               quantity: item.quantity,
             })),
@@ -28,8 +37,8 @@ export const POST = async (request: NextRequest) => {
     // p
     const payment = await processPayment({
       orderId: createdOrder.id,
-      amount: order.totalAmount,
-      cardNumber: order.cardNumber,
+      amount: order.data.totalAmount,
+      cardNumber: order.data.cardNumber,
     });
 
     await prisma.order.update({
@@ -42,8 +51,25 @@ export const POST = async (request: NextRequest) => {
       },
     });
 
-    await removeCartItems(order.items);
-    return new Response("Order created successfully", { status: 201 });
+    if (order.data.couponCode) {
+      await prisma.user.update({
+        where: {
+          id: session?.user.id,
+        },
+        data: {
+          discountUnlockedAt: createdOrder.id,
+          completedOrderCount: {
+            increment: 1,
+          },
+        },
+      });
+    }
+
+    await removeCartItems(order.data.items);
+    return new Response(
+      JSON.stringify({ message: "Order created successfully" }),
+      { status: 201 },
+    );
   } catch (error) {
     console.error(error);
     return new Response("Internal Server Error", { status: 500 });

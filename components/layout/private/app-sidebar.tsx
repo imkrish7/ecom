@@ -24,12 +24,12 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
+      title: "Orders",
+      url: "/orders",
       icon: List,
     },
     {

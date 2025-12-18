@@ -1,4 +1,6 @@
 import { http } from "@/lib/http";
+import { z } from "zod";
+import { orderSchema } from "@/schema/order.schema";
 
 export const fetchProducts = async <T>(): Promise<T> => {
   const products = await http<T>("/api/products", { method: "GET" });
@@ -57,6 +59,14 @@ export const applyDiscount = async <T>(
   const response = await http<T>("/api/orders/discounts", {
     method: "POST",
     body: JSON.stringify({ code, total }),
+  });
+  return response;
+};
+
+export const processPayment = async (data: z.infer<typeof orderSchema>) => {
+  const response = await http("/api/orders/checkout", {
+    method: "POST",
+    body: JSON.stringify(data),
   });
   return response;
 };
