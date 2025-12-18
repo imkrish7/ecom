@@ -6,7 +6,6 @@ import loginSchema from "@/schema/login.schema";
 import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
-  console.log("POST /api/auth/login");
   const data = await req.json();
   const cookieStore = await cookies();
 

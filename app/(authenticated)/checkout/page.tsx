@@ -59,14 +59,14 @@ export default function Page() {
 
   const handleSubmit = (payment: z.infer<typeof cardDetailsSchema>) => {
     // Handle form submission logic here
-    console.log(payment);
+
     startTransition(async () => {
       try {
         const items = products.map((product) => ({
           productId: product.id,
           quantity: product.quantity!,
         }));
-        console.log(items);
+
         await processPayment({
           ...payment,
           totalAmount: total,

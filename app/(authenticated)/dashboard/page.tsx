@@ -13,7 +13,7 @@ export default function Page() {
     startTransition(async () => {
       try {
         const _products = await fetchProducts<Product[]>();
-        console.log(_products);
+
         setProducts(_products);
       } catch (error) {
         console.error(error);

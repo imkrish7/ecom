@@ -1,16 +1,16 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/lib/dal";
 import { orderSchema } from "@/schema/order.schema";
 import { processPayment } from "@/lib/performPayment";
 import { removeCartItems } from "@/lib/cart";
 import prisma from "@/lib/prisma";
+import { JWTExpired } from "jose/errors";
 
 export const POST = async (request: NextRequest) => {
   const session = await verifySession();
   try {
     const data = await request.json();
     const order = orderSchema.safeParse(data);
-    console.log(order.data);
 
     if (!order.success) {
       return new Response(JSON.stringify({ error: "Invalid order data" }), {
@@ -72,6 +72,10 @@ export const POST = async (request: NextRequest) => {
     );
   } catch (error) {
     console.error(error);
-    return new Response("Internal Server Error", { status: 500 });
+    if (error instanceof JWTExpired) {
+      return NextResponse.redirect("/signin");
+    } else {
+      return new Response("Internal Server Error", { status: 500 });
+    }
   }
 };

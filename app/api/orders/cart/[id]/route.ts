@@ -1,7 +1,8 @@
 import { deleteCartSchema, selectItem } from "@/schema/order.schema";
 import { verifySession } from "@/lib/dal";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { JWTExpired } from "jose/errors";
 
 export const POST = async (
   request: NextRequest,
@@ -19,7 +20,7 @@ export const POST = async (
         status: 400,
       });
     }
-    console.log(data.id);
+
     const cartItem = await prisma.cartItem.findUnique({
       where: {
         productId: data.id,
@@ -46,9 +47,11 @@ export const POST = async (
     });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ message: "Internal Server Error" }), {
-      status: 500,
-    });
+    if (error instanceof JWTExpired) {
+      return NextResponse.redirect("/signin");
+    } else {
+      return new Response("Internal Server Error", { status: 500 });
+    }
   }
 };
 
@@ -87,6 +90,10 @@ export const DELETE = async (
     );
   } catch (error) {
     console.error(error);
-    return new Response("Internal Server Error", { status: 500 });
+    if (error instanceof JWTExpired) {
+      return NextResponse.redirect("/signin");
+    } else {
+      return new Response("Internal Server Error", { status: 500 });
+    }
   }
 };

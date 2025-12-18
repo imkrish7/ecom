@@ -1,5 +1,7 @@
 import { verifySession } from "@/lib/dal";
 import prisma from "@/lib/prisma";
+import { JWTExpired } from "jose/errors";
+import { NextResponse } from "next/server";
 
 export const GET = async () => {
   const session = await verifySession();
@@ -77,8 +79,10 @@ export const POST = async (request: Request) => {
     );
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-    });
+    if (error instanceof JWTExpired) {
+      return NextResponse.redirect("/signin");
+    } else {
+      return new Response("Internal Server Error", { status: 500 });
+    }
   }
 };

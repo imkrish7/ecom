@@ -1,6 +1,8 @@
 import { verifySession } from "@/lib/dal";
 import prisma from "@/lib/prisma";
 import { Product } from "@/types/products";
+import { JWTExpired } from "jose/errors";
+import { NextResponse } from "next/server";
 
 export const GET = async () => {
   const session = await verifySession();
@@ -27,8 +29,10 @@ export const GET = async () => {
     });
   } catch (error) {
     console.error(error);
-    return new Response("Internal Server Error", {
-      status: 500,
-    });
+    if (error instanceof JWTExpired) {
+      return NextResponse.redirect("/signin");
+    } else {
+      return new Response("Internal Server Error", { status: 500 });
+    }
   }
 };

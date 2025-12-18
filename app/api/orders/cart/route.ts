@@ -1,8 +1,10 @@
 import { verifySession } from "@/lib/dal";
 import { cartSchema } from "@/schema/order.schema";
 import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import { JWTExpired } from "jose/errors";
 
-export const POST = async (request: Request) => {
+export const POST = async (request: NextRequest) => {
   const session = await verifySession();
 
   const data = await request.json();
@@ -57,7 +59,11 @@ export const POST = async (request: Request) => {
     return new Response(JSON.stringify(updatedCart), { status: 201 });
   } catch (error) {
     console.error(error);
-    return new Response("Internal Server Error", { status: 500 });
+    if (error instanceof JWTExpired) {
+      return NextResponse.redirect("/signin");
+    } else {
+      return new Response("Internal Server Error", { status: 500 });
+    }
   }
 };
 
@@ -99,8 +105,10 @@ export const GET = async () => {
     });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ message: "Internal Server Error" }), {
-      status: 500,
-    });
+    if (error instanceof JWTExpired) {
+      return NextResponse.redirect("/signin");
+    } else {
+      return new Response("Internal Server Error", { status: 500 });
+    }
   }
 };
