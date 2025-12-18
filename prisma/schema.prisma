@@ -62,18 +62,21 @@ model Order {
   status        String
   completed     Boolean @default(false)
 
-  orderItems  OrderItem[]
-  totalAmount Float
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  payment     Payment?
+  orderItems     OrderItem[]
+  discountAmount Float       @default(0)
+  couponCode     String?
+  totalAmount    Float
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  payment        Payment?
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order  @relation(fields: [orderId], references: [id])
   productId String
+
   quantity  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
