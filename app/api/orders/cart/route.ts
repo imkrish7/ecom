@@ -31,7 +31,7 @@ export const POST = async (request: NextRequest) => {
 
     // check if item exist in cart;
     const itemExist = cart.cartItems.some(
-      (item) => item.productId === validatedData.data.items.productId,
+      (item) => item.productId === validatedData.data.item.productId,
     );
 
     if (itemExist) {
@@ -47,8 +47,8 @@ export const POST = async (request: NextRequest) => {
       data: {
         cartItems: {
           create: {
-            productId: validatedData.data.items.productId,
-            quantity: validatedData.data.items.quantity,
+            productId: validatedData.data.item.productId,
+            quantity: validatedData.data.item.quantity,
           },
         },
       },

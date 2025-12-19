@@ -10,7 +10,7 @@ export const fetchProducts = async <T>(): Promise<T> => {
 export const addToCart = async (productId: string, quantity: number) => {
   const response = await http("/api/orders/cart", {
     method: "POST",
-    body: JSON.stringify({ items: { productId, quantity } }),
+    body: JSON.stringify({ item: { productId, quantity } }),
   });
   return response;
 };
