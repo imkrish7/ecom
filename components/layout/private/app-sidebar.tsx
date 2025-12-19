@@ -14,28 +14,34 @@ import {
 } from "@/components/ui/sidebar";
 import { LayoutDashboard, List } from "lucide-react";
 import { NavMain } from "./nav-main";
+import { useAuth } from "@/context/authContext";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+  navMain: {
+    admin: [
+      {
+        title: "Dashboard",
+        url: "/admin/dashboard",
+        icon: LayoutDashboard,
+      },
+    ],
+    user: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        title: "Orders",
+        url: "/orders",
+        icon: List,
+      },
+    ],
   },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      title: "Orders",
-      url: "/orders",
-      icon: List,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const auth = useAuth();
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -53,11 +59,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {auth.user && (
+          <NavMain
+            items={data.navMain[auth.user.role == "user" ? "user" : "admin"]}
+          />
+        )}
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      <SidebarFooter>{auth.user && <NavUser user={auth.user} />}</SidebarFooter>
     </Sidebar>
   );
 }

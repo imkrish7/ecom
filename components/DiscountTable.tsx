@@ -3,7 +3,6 @@ import {
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -16,7 +15,6 @@ interface IProps {
 }
 
 export const DiscountTable = ({ discounts }: IProps) => {
-  console.log(discounts);
   return (
     <Table>
       <TableCaption>A list discounts.</TableCaption>

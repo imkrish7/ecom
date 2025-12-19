@@ -1,10 +1,10 @@
 import { verifySession } from "@/lib/dal";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { JWTExpired } from "jose/errors";
 import prisma from "@/lib/prisma";
 import { UnauthorizedError } from "@/lib/errors";
 
-export const GET = async (_req: NextRequest) => {
+export const GET = async () => {
   try {
     await verifySession(["admin"]);
 

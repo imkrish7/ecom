@@ -7,6 +7,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/context/authContext";
 import { LucideProps } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -22,6 +23,8 @@ export function NavMain({
   }[];
 }) {
   const router = useRouter();
+  const auth = useAuth();
+  console.log(auth);
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
