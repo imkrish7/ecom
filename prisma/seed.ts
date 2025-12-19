@@ -24,36 +24,34 @@ async function main() {
   const hashedPassword = await hashPassword("abc@123A");
   const user = await prisma.user.create({
     data: {
-      email: "test@example.com",
+      email: "user@example.com",
       name: "Test User",
-      role: "user",
       password: hashedPassword,
-      completedOrderCount: 2,
+      role: "user",
+      completedOrderCount: 1,
     },
   });
 
-  // Products
+  // ---------- PRODUCTS ----------
   const products = await prisma.product.createMany({
     data: [
       {
         name: "Laptop",
-        description:
-          "A high-performance laptop suitable for software development, gaming, and everyday productivity. Comes with fast SSD storage and a powerful processor.",
         price: 1000,
+        description:
+          "High performance laptop suitable for development and gaming.",
         imageUrl: "https://picsum.photos/seed/laptop/600/400",
       },
       {
         name: "Mouse",
-        description:
-          "Wireless ergonomic mouse designed for long working hours. Provides precision tracking and a comfortable grip.",
         price: 50,
+        description: "Wireless ergonomic mouse.",
         imageUrl: "https://picsum.photos/seed/mouse/600/400",
       },
       {
         name: "Keyboard",
-        description:
-          "Mechanical keyboard with tactile switches and customizable backlighting. Ideal for programmers and gamers.",
         price: 120,
+        description: "Mechanical keyboard with backlight.",
         imageUrl: "https://picsum.photos/seed/keyboard/600/400",
       },
     ],
@@ -61,45 +59,53 @@ async function main() {
 
   const allProducts = await prisma.product.findMany();
 
-  // Cart
+  // ---------- CART ----------
   const cart = await prisma.cart.create({
     data: {
       userId: user.id,
     },
   });
 
-  // Cart Items
+  // ---------- CART ITEMS ----------
   await prisma.cartItem.createMany({
     data: [
       {
         cartId: cart.id,
         productId: allProducts[0].id,
         quantity: 1,
+        selected: true,
       },
       {
         cartId: cart.id,
         productId: allProducts[1].id,
         quantity: 2,
+        selected: false,
       },
     ],
   });
 
-  // Coupon (every 3rd order logic)
-  await prisma.coupon.create({
+  // ---------- COUPON ----------
+  const coupon = await prisma.coupon.create({
     data: {
       code: "EVERY3RD10",
-      orderRequirements: 1,
+      orderRequirements: 3,
       discount: 10,
     },
   });
 
-  // Order
+  // ---------- ORDER ----------
+  const subtotal = 1000 + 2 * 50;
+  const discountAmount = 100;
+  const totalAmount = subtotal - discountAmount;
+
   const order = await prisma.order.create({
     data: {
       userId: user.id,
       status: "COMPLETED",
       completed: true,
-      totalAmount: 1100,
+      couponCode: coupon.code,
+      discountAmount,
+      totalAmount,
       orderItems: {
         create: [
           {
@@ -115,22 +121,25 @@ async function main() {
     },
   });
 
-  // Payment
+  // ---------- PAYMENT ----------
   await prisma.payment.create({
     data: {
       orderId: order.id,
       status: "SUCCESS",
-      amount: 1100,
+      amount: totalAmount,
       intent: "card_payment",
-      cardNumber: "4242424242424242",
+      cardNumber: "4111111111111111",
     },
   });
 
-  // Update order count
+  // ---------- UPDATE USER ----------
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      completedOrderCount: { increment: 1 },
+      completedOrderCount: {
+        increment: 1,
+      },
+      discountUsed: true,
     },
   });
 

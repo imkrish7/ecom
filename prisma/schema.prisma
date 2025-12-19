@@ -34,13 +34,14 @@ model Cart {
 }
 
 model Product {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   name        String
   price       Float
-  description String   @default("")
-  imageUrl    String   @default("")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  description String     @default("")
+  cartItems   CartItem[]
+  imageUrl    String     @default("")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model CartItem {
@@ -48,6 +49,7 @@ model CartItem {
   cartId    String
   cart      Cart     @relation(fields: [cartId], references: [id])
   productId String
+  product   Product  @relation(fields: [productId], references: [id])
   quantity  Int
   selected  Boolean  @default(false)
   createdAt DateTime @default(now())
