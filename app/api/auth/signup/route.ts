@@ -19,7 +19,9 @@ export const POST = async (request: Request) => {
     });
 
     if (isUserExist) {
-      return new Response("User already exists", { status: 409 });
+      return new Response(JSON.stringify({ message: "User already exist!" }), {
+        status: 409,
+      });
     }
     const hashedPassword = await hashPassword(password);
 
@@ -39,9 +41,14 @@ export const POST = async (request: Request) => {
       },
     });
 
-    return new Response("User created successfully", { status: 201 });
+    return new Response(
+      JSON.stringify({ message: "User created successfully" }),
+      { status: 201 },
+    );
   } catch (error) {
     console.error(error);
-    return new Response("Internal Server Error", { status: 500 });
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), {
+      status: 500,
+    });
   }
 };

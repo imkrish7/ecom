@@ -25,66 +25,81 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       email: "user@example.com",
-      name: "Test User",
-      password: hashedPassword,
+      name: "Regular User",
       role: "user",
-      completedOrderCount: 1,
+      password: hashedPassword,
     },
   });
 
-  // ---------- PRODUCTS ----------
-  const products = await prisma.product.createMany({
+  const admin = await prisma.user.create({
+    data: {
+      email: "admin@example.com",
+      name: "Admin User",
+      role: "admin",
+      password: hashedPassword,
+    },
+  });
+
+  // --------- CARTS ----------
+  const userCart = await prisma.cart.create({
+    data: { userId: user.id },
+  });
+
+  const adminCart = await prisma.cart.create({
+    data: { userId: admin.id },
+  });
+
+  // --------- PRODUCTS ----------
+  await prisma.product.createMany({
     data: [
       {
         name: "Laptop",
         price: 1000,
-        description:
-          "High performance laptop suitable for development and gaming.",
+        description: "High performance laptop",
         imageUrl: "https://picsum.photos/seed/laptop/600/400",
       },
       {
         name: "Mouse",
         price: 50,
-        description: "Wireless ergonomic mouse.",
+        description: "Wireless ergonomic mouse",
         imageUrl: "https://picsum.photos/seed/mouse/600/400",
       },
       {
         name: "Keyboard",
         price: 120,
-        description: "Mechanical keyboard with backlight.",
+        description: "Mechanical keyboard",
         imageUrl: "https://picsum.photos/seed/keyboard/600/400",
       },
     ],
   });
 
-  const allProducts = await prisma.product.findMany();
+  const products = await prisma.product.findMany();
 
-  // ---------- CART ----------
-  const cart = await prisma.cart.create({
-    data: {
-      userId: user.id,
-    },
-  });
-
-  // ---------- CART ITEMS ----------
+  // --------- CART ITEMS ----------
   await prisma.cartItem.createMany({
     data: [
       {
-        cartId: cart.id,
-        productId: allProducts[0].id,
+        cartId: userCart.id,
+        productId: products[0].id,
         quantity: 1,
         selected: true,
       },
       {
-        cartId: cart.id,
-        productId: allProducts[1].id,
+        cartId: userCart.id,
+        productId: products[1].id,
         quantity: 2,
         selected: false,
+      },
+      {
+        cartId: adminCart.id,
+        productId: products[2].id,
+        quantity: 1,
+        selected: true,
       },
     ],
   });
 
-  // ---------- COUPON ----------
+  // --------- COUPON ----------
   const coupon = await prisma.coupon.create({
     data: {
       code: "EVERY3RD10",
@@ -93,8 +108,8 @@ async function main() {
     },
   });
 
-  // ---------- ORDER ----------
-  const subtotal = 1000 + 2 * 50;
+  // --------- ORDER (for user only) ----------
+  const subtotal = 1000;
   const discountAmount = 100;
   const totalAmount = subtotal - discountAmount;
 
@@ -109,19 +124,15 @@ async function main() {
       orderItems: {
         create: [
           {
-            productId: allProducts[0].id,
+            productId: products[0].id,
             quantity: 1,
-          },
-          {
-            productId: allProducts[1].id,
-            quantity: 2,
           },
         ],
       },
     },
   });
 
-  // ---------- PAYMENT ----------
+  // --------- PAYMENT ----------
   await prisma.payment.create({
     data: {
       orderId: order.id,
@@ -132,20 +143,23 @@ async function main() {
     },
   });
 
-  // ---------- UPDATE USER ----------
+  // --------- UPDATE USER ----------
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      completedOrderCount: {
-        increment: 1,
-      },
+      completedOrderCount: { increment: 1 },
       discountUsed: true,
     },
   });
 
-  console.log("✅ Database seeded successfully");
+  console.log("✅ Database seeded with user & admin");
 }
 
 main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

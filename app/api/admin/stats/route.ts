@@ -2,6 +2,7 @@ import { verifySession } from "@/lib/dal";
 import { NextRequest, NextResponse } from "next/server";
 import { JWTExpired } from "jose/errors";
 import prisma from "@/lib/prisma";
+import { UnauthorizedError } from "@/lib/errors";
 
 export const GET = async (_req: NextRequest) => {
   try {
@@ -20,16 +21,16 @@ export const GET = async (_req: NextRequest) => {
     });
 
     const discounts = await prisma.$queryRaw`
-      SELECT SUM(o.discountAmount) as discountAmount, c.code
-      FROM orders o JOIN coupon c
-      ON o.couponCode = c.code
+      SELECT SUM(o.discountAmount) as discountAmount, c.code, c.discount
+      FROM "Order" o
+      JOIN Coupon c ON o.couponCode = c.code
       GROUP BY c.code
     `;
 
     return new Response(
       JSON.stringify({
         purchaseAmount: purchaseAmount._sum.totalAmount,
-        discount: discounts,
+        discounts: discounts,
         itemsPurchased: itemsCount._sum.quantity,
       }),
       { status: 200 },
@@ -38,8 +39,15 @@ export const GET = async (_req: NextRequest) => {
     console.error(error);
     if (error instanceof JWTExpired) {
       return NextResponse.redirect("/signin");
+    } else if (error instanceof UnauthorizedError) {
+      return new Response(JSON.stringify({ message: error.message }), {
+        status: error.statusCode,
+      });
     } else {
-      return new Response("Internal Server Error", { status: 500 });
+      return new Response(
+        JSON.stringify({ message: "Internal Server Error" }),
+        { status: 500 },
+      );
     }
   }
 };

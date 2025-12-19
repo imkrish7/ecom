@@ -30,9 +30,19 @@ export default async function proxy(req: NextRequest) {
     if (
       isPublic &&
       session.id &&
-      !req.nextUrl.pathname.startsWith("/dashboard")
+      !req.nextUrl.pathname.startsWith("/dashboard") &&
+      session.role === "user"
     ) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    if (
+      isPublic &&
+      session.id &&
+      !req.nextUrl.pathname.startsWith("/admin") &&
+      session.role === "admin"
+    ) {
+      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
     }
 
     return NextResponse.next();

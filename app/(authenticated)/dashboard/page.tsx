@@ -29,7 +29,12 @@ export default function Page() {
         <>
           {products.map((product: Product) => {
             return (
-              <ProductCard key={product.id} product={product} isCart={false} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                isCart={false}
+                isOrder={false}
+              />
             );
           })}
         </>

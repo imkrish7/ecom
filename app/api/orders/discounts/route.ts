@@ -2,6 +2,7 @@ import { verifySession } from "@/lib/dal";
 import prisma from "@/lib/prisma";
 import { JWTExpired } from "jose/errors";
 import { NextResponse } from "next/server";
+import { UnauthorizedError } from "@/lib/errors";
 
 export const GET = async () => {
   const session = await verifySession();
@@ -45,9 +46,18 @@ export const GET = async () => {
     });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-    });
+    if (error instanceof JWTExpired) {
+      return NextResponse.redirect("/signin");
+    } else if (error instanceof UnauthorizedError) {
+      return new Response(JSON.stringify({ message: error.message }), {
+        status: error.statusCode,
+      });
+    } else {
+      return new Response(
+        JSON.stringify({ message: "Internal Server Error" }),
+        { status: 500 },
+      );
+    }
   }
 };
 
@@ -81,8 +91,15 @@ export const POST = async (request: Request) => {
     console.error(error);
     if (error instanceof JWTExpired) {
       return NextResponse.redirect("/signin");
+    } else if (error instanceof UnauthorizedError) {
+      return new Response(JSON.stringify({ message: error.message }), {
+        status: error.statusCode,
+      });
     } else {
-      return new Response("Internal Server Error", { status: 500 });
+      return new Response(
+        JSON.stringify({ message: "Internal Server Error" }),
+        { status: 500 },
+      );
     }
   }
 };

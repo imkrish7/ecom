@@ -30,3 +30,26 @@ export interface AppliedDiscount {
   discountOnTotal: number;
   total: number;
 }
+
+export interface Order {
+  id: string;
+  userId: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  orderItems: OrderItem[];
+  couponCode: string | null;
+  discountAmount: number;
+  paymentStatus: string;
+  totalAmount: number;
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+  quantity: number;
+  createdAt: string;
+  updatedAt: string;
+  product: Product;
+}

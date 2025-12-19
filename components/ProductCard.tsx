@@ -125,7 +125,7 @@ export const ProductCard = ({
             Remove from Cart
           </Button>
         ) : (
-          isOrder && (
+          !isOrder && (
             <Button onClick={handleAddToCart}>
               {isPending && (
                 <Loader2Icon

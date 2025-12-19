@@ -3,3 +3,8 @@ export interface AuthPayload {
   email: string;
   role: string;
 }
+
+export interface SigninResponse {
+  token: string;
+  role: string;
+}

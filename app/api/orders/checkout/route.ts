@@ -5,6 +5,7 @@ import { processPayment } from "@/lib/performPayment";
 import { removeCartItems } from "@/lib/cart";
 import prisma from "@/lib/prisma";
 import { JWTExpired } from "jose/errors";
+import { UnauthorizedError } from "@/lib/errors";
 
 export const POST = async (request: NextRequest) => {
   const session = await verifySession();
@@ -74,8 +75,15 @@ export const POST = async (request: NextRequest) => {
     console.error(error);
     if (error instanceof JWTExpired) {
       return NextResponse.redirect("/signin");
+    } else if (error instanceof UnauthorizedError) {
+      return new Response(JSON.stringify({ message: error.message }), {
+        status: error.statusCode,
+      });
     } else {
-      return new Response("Internal Server Error", { status: 500 });
+      return new Response(
+        JSON.stringify({ message: "Internal Server Error" }),
+        { status: 500 },
+      );
     }
   }
 };

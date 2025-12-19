@@ -26,6 +26,7 @@ import { LoaderIcon } from "lucide-react";
 import { login } from "@/services/authService";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { SigninResponse } from "@/types/auth";
 
 export function LoginForm({
   className,
@@ -44,8 +45,10 @@ export function LoginForm({
   const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
     startTransition(async () => {
       try {
-        await login(data.email, data.password);
-        router.push("/dashboard");
+        const response = await login<SigninResponse>(data.email, data.password);
+        router.push(
+          response.role === "admin" ? "/admin/dashboard" : "/dashboard",
+        );
         toast.success("Login successful");
       } catch (error) {
         console.error(error);

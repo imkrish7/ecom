@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       path: "/",
     });
 
-    return new Response(JSON.stringify({ token }), {
+    return new Response(JSON.stringify({ token, role: user.role }), {
       status: 200,
     });
   } catch (error) {

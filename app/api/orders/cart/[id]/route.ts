@@ -3,6 +3,7 @@ import { verifySession } from "@/lib/dal";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { JWTExpired } from "jose/errors";
+import { UnauthorizedError } from "@/lib/errors";
 
 export const POST = async (
   request: NextRequest,
@@ -49,8 +50,15 @@ export const POST = async (
     console.error(error);
     if (error instanceof JWTExpired) {
       return NextResponse.redirect("/signin");
+    } else if (error instanceof UnauthorizedError) {
+      return new Response(JSON.stringify({ message: error.message }), {
+        status: error.statusCode,
+      });
     } else {
-      return new Response("Internal Server Error", { status: 500 });
+      return new Response(
+        JSON.stringify({ message: "Internal Server Error" }),
+        { status: 500 },
+      );
     }
   }
 };
