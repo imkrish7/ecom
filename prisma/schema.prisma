@@ -47,7 +47,7 @@ model CartItem {
   id        String   @id @default(uuid())
   cartId    String
   cart      Cart     @relation(fields: [cartId], references: [id])
-  productId String   @unique
+  productId String
   quantity  Int
   selected  Boolean  @default(false)
   createdAt DateTime @default(now())

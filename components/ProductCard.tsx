@@ -73,7 +73,11 @@ export const ProductCard = ({
   const addToOrderItem = (val: string | boolean) => {
     startTransition(async () => {
       try {
-        await selectToOrder(product.id, Boolean(val));
+        if (!product.cartItemId) {
+          toast.error("Product is not in cart");
+          return;
+        }
+        await selectToOrder(product.cartItemId, Boolean(val));
         addToOrder?.(product.id, Boolean(val));
       } catch (error) {
         console.error(error);

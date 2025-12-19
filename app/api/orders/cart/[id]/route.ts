@@ -23,7 +23,7 @@ export const POST = async (
 
     const cartItem = await prisma.cartItem.findUnique({
       where: {
-        productId: data.id,
+        id: data.id,
       },
     });
 
@@ -35,7 +35,7 @@ export const POST = async (
 
     await prisma.cartItem.update({
       where: {
-        productId: data.id,
+        id: data.id,
       },
       data: {
         selected: validatedData.data.isSelected,
